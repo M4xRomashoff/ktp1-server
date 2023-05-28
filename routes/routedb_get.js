@@ -16,6 +16,18 @@ router.get('/get_ktp_all', (req, res) => {
   })
 });
 
+router.get('/get_ktp_date/:date', (req, res) => {
+  const date = req?.params?.date;
+  const sql= 'SELECT * FROM ktp_all WHERE DATE(date_time) = "'+date+'"';
+  console.log('sql',sql);
+  connection.query(sql, (error, result) => {
+    if (error) {
+      res.send('error to fetch test all records', error)
+    } else {
+      res.send(result)
+    }
+  })
+});
 
 
 
