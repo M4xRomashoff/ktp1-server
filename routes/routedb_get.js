@@ -1,8 +1,10 @@
 var express = require('express');
 var connection = require('./dbconfig')
 var router = express.Router();
+const fs = require('fs');
 
 /* GET home page. */
+const fileName = "C:\\mynewfile1.txt";
 
 
 
@@ -29,6 +31,40 @@ router.get('/get_ktp_date/:date', (req, res) => {
   })
 });
 
+
+
+router.get('/get_ktp_all_file', (req, res) => {
+
+
+  fs.appendFile('C:\\mynewfile1.txt', 'Hello content!', function (err) {
+    if (err) throw err;
+    console.log('Saved!');
+  });
+
+  connection.query('SELECT * FROM ktp_all',
+      function(err, rows, fields){ if(err)   {
+        throw err;
+      }else{
+
+        var fite = 'КТП 1 \t КТП 1 \t КТП 1 \t КТП 1 \t  Дата и время '+ '\n';
+        for (var i in rows) {
+          fite += rows[i].temperature1 + '\t' + rows[i].temperature2 + '\t'
+                + rows[i].temperature3 + '\t' + rows[i].temperature4 + '\t' + rows[i].date_time + '\n';
+        }
+
+        fs.writeFile( fileName, fite, function (err) {
+          if (err) throw err;
+          console.log('Saved!');
+        });
+
+        const rs = fs.createReadStream(fileName);
+        res.setHeader("Content-Disposition", "attachment; dball.txt");
+        rs.pipe(res);
+
+      }
+    })
+
+});
 
 
 router.get('/create', (req, res) => {

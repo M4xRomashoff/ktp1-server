@@ -9,8 +9,51 @@ var bodyParser = require('body-parser');
 var indexRouter = require('./routes/index');
 var dbRouter = require('./routes/routedb_get');
 var usersRouter = require('./routes/users');
-
 var app = express();
+var connection = require('./routes/dbconfig')
+
+const cron = require('node-cron');
+const fetch = require('node-fetch');
+
+
+
+
+function save_data1(str_data){
+  let ar=str_data.split(' ');
+  ar[1]="NULL";
+  console.log('fetching and saving');
+  connection.query('INSERT INTO ktp_all (temperature1, temperature2 ) ' +
+      'VALUES (' +ar[1] +', ' + ar[3] + ');',
+      (error, result) => {
+      if (error) {
+        console.log('db error ', error)
+      } else {
+        console.log('db updated !')
+      }
+  })
+}
+
+function save_data2(str_data){
+  let ar=str_data.split(' ');
+
+  connection.query('INSERT INTO ktp_all (temperature3, temperature4 ) ' +
+      'VALUES (' +ar[1] +', ' + ar[3] + ');',
+      (error, result) => {
+        if (error) {
+          console.log('db error ', error)
+        } else {
+          console.log('db updated !')
+        }
+      })
+}
+cron.schedule('5 * * * * ', function() {  // время запросов с датчиков
+
+  fetch('http://192.168.0.66:80')
+      .then(res => res.text())
+      .then(text => {console.log(text);
+        save_data1(text)})
+      .catch(err => console.log('fetch error',err));
+});
 
 // view engine setup
 app.set('views', path.join(__dirname, 'views'));
