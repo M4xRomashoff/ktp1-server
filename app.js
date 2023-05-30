@@ -15,13 +15,26 @@ var connection = require('./routes/dbconfig')
 const cron = require('node-cron');
 const fetch = require('node-fetch');
 
+function isFloat(n) {
+    return parseFloat(n.match(/^-?\d*(\.\d+)?$/))>0;
+}
+function check_data1(text){
 
-
+    let newText ='unit_A_temperature NULL unit_B_temperature NULL';
+    let blancAr=newText.split(' ');
+    let resAr = text.split(' ');
+    if (resAr.length === 4){
+       if (resAr[0] === 'unit_A_temperature' && isFloat(resAr[1])) blancAr[1] = resAr[1];
+       if (resAr[2] === 'unit_B_temperature' && isFloat(resAr[3])) blancAr[3] = resAr[3];
+    newText = blancAr[0]+' '+blancAr[1]+' '+blancAr[2]+' '+blancAr[3];
+    }
+    return newText;
+}
 
 function save_data1(str_data){
   let ar=str_data.split(' ');
-  ar[1]="NULL";
   console.log('fetching and saving');
+  console.log('INSERT INTO ktp_all (temperature1, temperature2 ) ' + 'VALUES (' +ar[1] +', ' + ar[3] + ');')
   connection.query('INSERT INTO ktp_all (temperature1, temperature2 ) ' +
       'VALUES (' +ar[1] +', ' + ar[3] + ');',
       (error, result) => {
@@ -46,12 +59,14 @@ function save_data2(str_data){
         }
       })
 }
-cron.schedule('5 * * * * ', function() {  // время запросов с датчиков
+//cron.schedule('*/5 * * * *', function() {  // время запросов с датчиков каждые 5 мин
+//cron.schedule('* * * * *', function() {  // время запросов с датчиков каждую мин
+cron.schedule('*/2 * * * *', function() {  // время запросов с датчиков каждые 2 мин
 
   fetch('http://192.168.0.66:80')
       .then(res => res.text())
       .then(text => {console.log(text);
-        save_data1(text)})
+        save_data1(check_data1(text))})
       .catch(err => console.log('fetch error',err));
 });
 
