@@ -1,3 +1,7 @@
+
+//c:\ktp-server\bin>node www   запустить сервер
+
+
 var createError = require('http-errors');
 var cors = require('cors');
 var express = require('express');
@@ -15,6 +19,9 @@ var connection = require('./routes/dbconfig')
 const cron = require('node-cron');
 const fetch = require('node-fetch');
 
+let temp1 ='NULL';
+let temp2 ='NULL';
+
 function isFloat(n) {
     return parseFloat(n.match(/^-?\d*(\.\d+)?$/))>0;
 }
@@ -31,22 +38,51 @@ function check_data1(text){
     return newText;
 }
 
+function check_data2(text){
+
+    let newText ='unit_C_temperature NULL unit_D_temperature NULL';
+    let blancAr=newText.split(' ');
+    let resAr = text.split(' ');
+    if (resAr.length === 4){
+        if (resAr[0] === 'unit_C_temperature' && isFloat(resAr[1])) blancAr[1] = resAr[1];
+        if (resAr[2] === 'unit_D_temperature' && isFloat(resAr[3])) blancAr[3] = resAr[3];
+        newText = blancAr[0]+' '+blancAr[1]+' '+blancAr[2]+' '+blancAr[3];
+    }
+    return newText;
+}
 function save_data1(str_data){
   let ar=str_data.split(' ');
-  console.log('fetching and saving');
-  console.log('INSERT INTO ktp_all (temperature1, temperature2 ) ' + 'VALUES (' +ar[1] +', ' + ar[3] + ');')
-  connection.query('INSERT INTO ktp_all (temperature1, temperature2 ) ' +
-      'VALUES (' +ar[1] +', ' + ar[3] + ');',
-      (error, result) => {
-      if (error) {
-        console.log('db error ', error)
-      } else {
-        console.log('db updated !')
-      }
-  })
+  temp1 = ar[1];
+  temp2 = ar[3];
+  // console.log('INSERT INTO ktp_all (temperature1, temperature2 ) ' + 'VALUES (' +ar[1] +', ' + ar[3] + ');')
+  // connection.query('INSERT INTO ktp_all (temperature1, temperature2 ) ' +
+  //     'VALUES (' +ar[1] +', ' + ar[3] + ');',
+  //     (error, result) => {
+  //     if (error) {
+  //       console.log('db error ', error)
+  //     } else {
+  //       console.log('db updated !')
+  //     }
+  // })
 }
 
 function save_data2(str_data){
+    let ar=str_data.split(' ');
+    console.log('fetching and saving 2', temp1,' ',temp2,' ',ar[1],' ',ar[3]);
+
+    sql = 'INSERT INTO ktp_all (temperature1, temperature2, temperature3, temperature4 ) '
+        + 'VALUES (' +temp1 +', ' + temp2 + ', ' +ar[1] +', ' + ar[3] + ');';
+    console.log()
+    connection.query(sql,
+        (error, result) => {
+            if (error) {
+                console.log('db error ', error)
+            } else {
+                console.log('db updated !')
+            }
+        })
+}
+function save_data(str_data){
   let ar=str_data.split(' ');
 
   connection.query('INSERT INTO ktp_all (temperature3, temperature4 ) ' +
@@ -60,14 +96,19 @@ function save_data2(str_data){
       })
 }
 //cron.schedule('*/5 * * * *', function() {  // время запросов с датчиков каждые 5 мин
-//cron.schedule('* * * * *', function() {  // время запросов с датчиков каждую мин
-cron.schedule('*/2 * * * *', function() {  // время запросов с датчиков каждые 2 мин
+cron.schedule('* * * * *', function() {  // время запросов с датчиков каждую мин
+//cron.schedule('*/2 * * * *', function() {  // время запросов с датчиков каждые 2 мин
 
   fetch('http://192.168.0.66:80')
       .then(res => res.text())
       .then(text => {console.log(text);
         save_data1(check_data1(text))})
       .catch(err => console.log('fetch error',err));
+    fetch('http://192.168.0.25:80')
+        .then(res => res.text())
+        .then(text => {console.log(text);
+            save_data2(check_data2(text))})
+        .catch(err => console.log('fetch error',err));
 });
 
 // view engine setup
