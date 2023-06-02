@@ -99,7 +99,7 @@ function save_data(str_data){
 cron.schedule('* * * * *', function() {  // время запросов с датчиков каждую мин
 //cron.schedule('*/2 * * * *', function() {  // время запросов с датчиков каждые 2 мин
 
-  fetch('http://192.168.0.66:80')
+  fetch('http://192.168.60.34:80')
       .then(res => res.text())
       .then(text => {console.log(text);
         save_data1(check_data1(text))})
@@ -108,7 +108,9 @@ cron.schedule('* * * * *', function() {  // время запросов с да�
         .then(res => res.text())
         .then(text => {console.log(text);
             save_data2(check_data2(text))})
-        .catch(err => console.log('fetch error',err));
+        .catch(err => {console.log('fetch error',err);
+            const textEmpty ='unit_C_temperature NULL unit_D_temperature NULL';
+            save_data2(check_data2(textEmpty))});
 });
 
 // view engine setup
