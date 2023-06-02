@@ -95,8 +95,8 @@ function save_data(str_data){
         }
       })
 }
-//cron.schedule('*/5 * * * *', function() {  // время запросов с датчиков каждые 5 мин
-cron.schedule('* * * * *', function() {  // время запросов с датчиков каждую мин
+cron.schedule('*/5 * * * *', function() {  // время запросов с датчиков каждые 5 мин
+//cron.schedule('* * * * *', function() {  // время запросов с датчиков каждую мин
 //cron.schedule('*/2 * * * *', function() {  // время запросов с датчиков каждые 2 мин
 
   fetch('http://192.168.60.34:80')
