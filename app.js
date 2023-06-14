@@ -21,96 +21,107 @@ const fetch = require('node-fetch');
 
 let temp1 ='NULL';
 let temp2 ='NULL';
+let temp3 ='NULL';
+let temp4 ='NULL';
 
 function isFloat(n) {
     return parseFloat(n.match(/^-?\d*(\.\d+)?$/))>0;
 }
-function check_data1(text){
 
-    let newText ='unit_A_temperature NULL unit_B_temperature NULL';
-    let blancAr=newText.split(' ');
+function check_data4(text){
+
+   // 'unit_A_temperature NULL unit_B_temperature NULL unit_C_temperature NULL unit_D_temperature NULL'
     let resAr = text.split(' ');
-    if (resAr.length === 4){
-       if (resAr[0] === 'unit_A_temperature' && isFloat(resAr[1])) blancAr[1] = resAr[1];
-       if (resAr[2] === 'unit_B_temperature' && isFloat(resAr[3])) blancAr[3] = resAr[3];
-    newText = blancAr[0]+' '+blancAr[1]+' '+blancAr[2]+' '+blancAr[3];
+    if (resAr.length === 8){
+        if (resAr[0] === 'unit_A_temperature' && isFloat(resAr[1])) temp1 = resAr[1];
+        if (resAr[2] === 'unit_B_temperature' && isFloat(resAr[3])) temp2 = resAr[3];
+        if (resAr[4] === 'unit_C_temperature' && isFloat(resAr[5])) temp3 = resAr[5];
+        if (resAr[6] === 'unit_D_temperature' && isFloat(resAr[3])) temp4 = resAr[7];
     }
-    return newText;
+    return 'ok';
 }
 
-function check_data2(text){
+// function check_data1(text){
+//
+//     let newText ='unit_A_temperature NULL unit_B_temperature NULL';
+//     let blancAr=newText.split(' ');
+//     let resAr = text.split(' ');
+//     if (resAr.length === 4){
+//         if (resAr[0] === 'unit_A_temperature' && isFloat(resAr[1])) blancAr[1] = resAr[1];
+//         if (resAr[2] === 'unit_B_temperature' && isFloat(resAr[3])) blancAr[3] = resAr[3];
+//         newText = blancAr[0]+' '+blancAr[1]+' '+blancAr[2]+' '+blancAr[3];
+//     }
+//     return newText;
+// }
 
-    let newText ='unit_C_temperature NULL unit_D_temperature NULL';
-    let blancAr=newText.split(' ');
-    let resAr = text.split(' ');
-    if (resAr.length === 4){
-        if (resAr[0] === 'unit_C_temperature' && isFloat(resAr[1])) blancAr[1] = resAr[1];
-        if (resAr[2] === 'unit_D_temperature' && isFloat(resAr[3])) blancAr[3] = resAr[3];
-        newText = blancAr[0]+' '+blancAr[1]+' '+blancAr[2]+' '+blancAr[3];
-    }
-    return newText;
-}
-function save_data1(str_data){
-  let ar=str_data.split(' ');
-  temp1 = ar[1];
-  temp2 = ar[3];
-  // console.log('INSERT INTO ktp_all (temperature1, temperature2 ) ' + 'VALUES (' +ar[1] +', ' + ar[3] + ');')
-  // connection.query('INSERT INTO ktp_all (temperature1, temperature2 ) ' +
-  //     'VALUES (' +ar[1] +', ' + ar[3] + ');',
-  //     (error, result) => {
-  //     if (error) {
-  //       console.log('db error ', error)
-  //     } else {
-  //       console.log('db updated !')
-  //     }
-  // })
-}
+// function check_data2(text){
+//     //console.log('text',text);
+//     //resAr [ 'no_data_C', 'NULL', '', 'unit_D_temperature', '40.50' ]
+//
+//     let newText ='unit_C_temperature NULL unit_D_temperature NULL';
+//     let blancAr=newText.split(' ');
+//     let resAr = text.split(' ');
+//     //console.log('resAr',resAr);
+//     if (resAr.length === 4){
+//         if (resAr[0] === 'unit_C_temperature' && isFloat(resAr[1])) blancAr[1] = resAr[1];
+//         if (resAr[2] === 'unit_D_temperature' && isFloat(resAr[3])) blancAr[3] = resAr[3];
+//         newText = blancAr[0]+' '+blancAr[1]+' '+blancAr[2]+' '+blancAr[3];
+//     }
+//     return newText;
+// }
+// function prep_data1(str_data){
+//     let ar=str_data.split(' ');
+//     temp1 = ar[1];
+//     temp2 = ar[3];
+// }
+//
+// function prep_data2(str_data){
+//     let ar=str_data.split(' ');
+//     temp3 = ar[1];
+//     temp4 = ar[3];
+// }
+function save_data_all(){
 
-function save_data2(str_data){
-    let ar=str_data.split(' ');
-    console.log('fetching and saving 2', temp1,' ',temp2,' ',ar[1],' ',ar[3]);
+    console.log('fetching and saving all', temp1,' ',temp2,' ',temp3,' ',temp4);
 
     sql = 'INSERT INTO ktp_all (temperature1, temperature2, temperature3, temperature4 ) '
-        + 'VALUES (' +temp1 +', ' + temp2 + ', ' +ar[1] +', ' + ar[3] + ');';
-    console.log()
+        + 'VALUES (' +temp1 +', ' + temp2 + ', ' + temp3 +', ' + temp4+ ');';
+
     connection.query(sql,
         (error, result) => {
             if (error) {
                 console.log('db error ', error)
             } else {
-                console.log('db updated !')
+                console.log('db updated !');
+                temp1 = 'NULL';
+                temp2 = 'NULL';
+                temp3 = 'NULL';
+                temp4 = 'NULL';
             }
         })
 }
-function save_data(str_data){
-  let ar=str_data.split(' ');
 
-  connection.query('INSERT INTO ktp_all (temperature3, temperature4 ) ' +
-      'VALUES (' +ar[1] +', ' + ar[3] + ');',
-      (error, result) => {
-        if (error) {
-          console.log('db error ', error)
-        } else {
-          console.log('db updated !')
-        }
-      })
-}
-cron.schedule('*/5 * * * *', function() {  // время запросов с датчиков каждые 5 мин
-//cron.schedule('* * * * *', function() {  // время запросов с датчиков каждую мин
+//ron.schedule('*/5 * * * *', function() {  // время запросов с датчиков каждые 5 мин
+cron.schedule('* * * * *', function() {  // время запросов с датчиков каждую мин
 //cron.schedule('*/2 * * * *', function() {  // время запросов с датчиков каждые 2 мин
 
-  fetch('http://192.168.60.34:80')
-      .then(res => res.text())
-      .then(text => {console.log(text);
-        save_data1(check_data1(text))})
-      .catch(err => console.log('fetch error',err));
-    fetch('http://192.168.0.25:80')
+    fetch('http://192.168.60.176:49152')
         .then(res => res.text())
         .then(text => {console.log(text);
-            save_data2(check_data2(text))})
+            let res = check_data4(text);
+        save_data_all();})
         .catch(err => {console.log('fetch error',err);
-            const textEmpty ='unit_C_temperature NULL unit_D_temperature NULL';
-            save_data2(check_data2(textEmpty))});
+        save_data_all();});
+
+    // fetch('http://192.168.60.176:80')
+    //     .then(res => res.text())
+    //     .then(text => {console.log(text);
+    //         prep_data2(check_data2(text));
+    //         save_data_all();})
+    //     .catch(err => {console.log('fetch error',err);
+    //         const textEmpty ='unit_C_temperature NULL unit_D_temperature NULL';
+    //         prep_data2(check_data2(textEmpty));
+    //         save_data_all();});
 });
 
 // view engine setup
@@ -134,18 +145,18 @@ app.use('/db', dbRouter);
 
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {
-  next(createError(404));
+    next(createError(404));
 });
 
 // error handler
 app.use(function(err, req, res, next) {
-  // set locals, only providing error in development
-  res.locals.message = err.message;
-  res.locals.error = req.app.get('env') === 'development' ? err : {};
+    // set locals, only providing error in development
+    res.locals.message = err.message;
+    res.locals.error = req.app.get('env') === 'development' ? err : {};
 
-  // render the error page
-  res.status(err.status || 500);
-  res.render('error');
+    // render the error page
+    res.status(err.status || 500);
+    res.render('error');
 });
 
 module.exports = app;

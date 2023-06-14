@@ -4,7 +4,7 @@ var router = express.Router();
 const fs = require('fs');
 
 /* GET home page. */
-const fileName = "C:\\mynewfile1.txt";
+const fileName = "C:\\tempall.txt";
 
 
 
@@ -31,22 +31,36 @@ router.get('/get_ktp_date/:date', (req, res) => {
   })
 });
 
+router.get('/get_ktp_range/:date', (req, res) => {
+  const dateA = (req?.params?.date).split(',')[0];
+  const dateZ = (req?.params?.date).split(',')[1];
+  const sql= 'SELECT * FROM ktp_all WHERE  date_time BETWEEN "' + dateA + '" AND "'+ dateZ + '" ;';
+
+  connection.query(sql, (error, result) => {
+    if (error) {
+      res.send('error to fetch test all records', error)
+    } else {
+      res.send(result)
+    }
+  })
+});
+
 
 
 router.get('/get_ktp_all_file', (req, res) => {
 
-
-  fs.appendFile('C:\\mynewfile1.txt', 'Hello content!', function (err) {
-    if (err) throw err;
-    console.log('Saved!');
-  });
+  //
+  // fs.appendFile("C:\\tempall.txt", 'Hello content!', function (err) {
+  //   if (err) throw err;
+  //   console.log('Saved!');
+  // });
 
   connection.query('SELECT * FROM ktp_all',
       function(err, rows, fields){ if(err)   {
         throw err;
       }else{
 
-        var fite = 'КТП 1 \t КТП 1 \t КТП 1 \t КТП 1 \t  Дата и время '+ '\n';
+        var fite = 'КТП 23 \t КТП 24 \t КТП 27 \t КТП 26 \t  Дата и время '+ '\n';
         for (var i in rows) {
           fite += rows[i].temperature1 + '\t' + rows[i].temperature2 + '\t'
                 + rows[i].temperature3 + '\t' + rows[i].temperature4 + '\t' + rows[i].date_time + '\n';
@@ -54,12 +68,13 @@ router.get('/get_ktp_all_file', (req, res) => {
 
         fs.writeFile( fileName, fite, function (err) {
           if (err) throw err;
-          console.log('Saved!');
         });
-
+        console.log('Saved!');
         const rs = fs.createReadStream(fileName);
-        res.setHeader("Content-Disposition", "attachment; dball.txt");
+        //res.setHeader("Content-Disposition", "attachment; dball.txt");
+        res.setHeader("Content-Disposition", "attachment;"+fileName);
         rs.pipe(res);
+        console.log('file sent..');
 
       }
     })
